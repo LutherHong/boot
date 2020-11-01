@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.HtmlUtils;
 
+import javax.servlet.http.HttpSession;
 import java.util.Objects;
 
 @RestController
@@ -17,7 +18,7 @@ public class LoginController {
 
     @CrossOrigin
     @PostMapping(value = "api/login")
-    public Result login(@RequestBody User requestUser) {
+    public Result login(@RequestBody User requestUser, HttpSession session) {
         // 对html标签进行逐一，放置XSS攻击
         String username = requestUser.getUsername();
         username = HtmlUtils.htmlEscape(username);
@@ -30,6 +31,7 @@ public class LoginController {
         if(null == user){
             return new Result(400);
         }else{
+            session.setAttribute("user",user);
             return new Result(200);
         }
     }
