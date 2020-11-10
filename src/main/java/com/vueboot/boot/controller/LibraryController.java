@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin
 @RestController
 public class LibraryController {
     @Autowired
@@ -34,6 +35,16 @@ public class LibraryController {
             return bookService.listByCategory(cid);
         } else {
             return list();
+        }
+    }
+
+    @GetMapping("/api/search")
+    public List<Book> searchResult(@RequestParam("keywords") String keywords) {
+        // 关键词为空时查询出所有书籍
+        if ("".equals(keywords)) {
+            return bookService.list();
+        } else {
+            return bookService.Search(keywords);
         }
     }
 }
