@@ -2,9 +2,13 @@ package com.vueboot.boot.controller;
 
 import com.vueboot.boot.pojo.Book;
 import com.vueboot.boot.service.BookService;
+import com.vueboot.boot.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 @CrossOrigin
@@ -14,7 +18,7 @@ public class LibraryController {
     BookService bookService;
 
     @GetMapping("/api/books")
-    public List<Book> list() throws Exception{
+    public List<Book> list() throws Exception {
         return bookService.list();
     }
 
@@ -45,6 +49,24 @@ public class LibraryController {
             return bookService.list();
         } else {
             return bookService.Search(keywords);
+        }
+    }
+
+    @PostMapping("/api/covers")
+    public String coversUpload(MultipartFile file) {
+        String folder = "E:\\";
+        File imageFolder = new File(folder);
+        String originalFilename = file.getOriginalFilename();
+        File f = new File(imageFolder, StringUtils.getRandomString(6) + originalFilename.substring(originalFilename.length() - 4));
+        if(!f.getParentFile().exists())
+            f.getParentFile().mkdirs();
+        try {
+            file.transferTo(f);
+            String imgURL = "http://localhost:8443/api/file/"+f.getName();
+            return imgURL;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
         }
     }
 }
