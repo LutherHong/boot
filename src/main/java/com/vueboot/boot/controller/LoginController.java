@@ -51,7 +51,15 @@ public class LoginController {
             return ResultFactory.buildFailResult("账号密码错误");
         }
 
+    }
 
+    @ResponseBody
+    @GetMapping("api/logout")
+    public Result logout() {
+        Subject subject = SecurityUtils.getSubject();
+        subject.logout();
+        String message = "成功登出";
+        return ResultFactory.buildSuccessResult(message);
     }
 
     @PostMapping("api/register")
