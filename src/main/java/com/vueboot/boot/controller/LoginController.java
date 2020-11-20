@@ -4,8 +4,12 @@ import com.vueboot.boot.pojo.User;
 import com.vueboot.boot.result.Result;
 import com.vueboot.boot.result.ResultFactory;
 import com.vueboot.boot.service.UserService;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.SimpleHash;
+import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.HtmlUtils;
@@ -22,21 +26,32 @@ public class LoginController {
 
     @PostMapping(value = "api/login")
     public Result login(@RequestBody User requestUser, HttpSession session) {
-        // 对html标签进行逐一，放置XSS攻击
+        // 对html标签进行转义，防止XSS攻击（评论的时候写成恶意js，然后后端不处理返回前端）
         String username = requestUser.getUsername();
         username = HtmlUtils.htmlEscape(username);
 
-//        if(!Objects.equals("admin",username)||!Objects.equals("123456",requestUser.getPassword())){
-//            String message = "账号密码错误";
-//            System.out.println("test");
+////        if(!Objects.equals("admin",username)||!Objects.equals("123456",requestUser.getPassword())){
+////            String message = "账号密码错误";
+////            System.out.println("test");
+////            return new Result(400);
+//        User user = userService.get(username, requestUser.getPassword());
+//        if(null == user){
 //            return new Result(400);
-        User user = userService.get(username, requestUser.getPassword());
-        if(null == user){
-            return new Result(400);
-        }else{
-            session.setAttribute("user",user);
-            return new Result(200);
+//        }else{
+//            session.setAttribute("user",user);
+//            return new Result(200);
+//        }
+        Subject subject = SecurityUtils.getSubject();
+        UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(username, requestUser.getPassword());
+
+        try {
+            subject.login(usernamePasswordToken);
+            return ResultFactory.buildSuccessResult(username);
+        }catch (AuthenticationException e){
+            return ResultFactory.buildFailResult("账号密码错误");
         }
+
+
     }
 
     @PostMapping("api/register")
