@@ -89,4 +89,11 @@ public class LoginController {
 
         return ResultFactory.buildSuccessResult(user);
     }
+
+    // 为了前端console中用假用户名登陆，增加一个空方法，强制进入后端拦截
+    @ResponseBody
+    @GetMapping(value = "api/authentication")
+    public String authentication(){
+        return "身份认证成功";
+    }
 }
